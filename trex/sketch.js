@@ -10,9 +10,11 @@ var obstaclesGroup, obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obsta
 
 var score;
 var gameOverImg,restartImg
-var jumpSound , checkPointSound, dieSound
+var jumpSound , checkPointSound, dieSound, jumpButton
 
-localStorage(HighScore) = 0;
+
+
+localStorage["HighScore"] = 0;
 
 function preload(){
   trex_running = loadAnimation("trex1.png","trex3.png","trex4.png");
@@ -60,7 +62,11 @@ function setup() {
   restart = createSprite(300,140);
   restart.addImage(restartImg);
   
- 
+  jumpButton = createSprite(500,165);
+  jumpButton.addImage(restartImg);
+  jumpButton.scale = 0.8;
+  jumpButton.depth = 0;
+
   gameOver.scale = 0.5;
   restart.scale = 0.5;
   
@@ -82,15 +88,19 @@ function setup() {
 function draw() {
   
   background(180);
-  //displaying score
+  //displaying score and HighScore
   text("Score: "+ score, 500,50);
+  text("High Score: "+ localStorage["HighScore"], 100,50);
   
-  
+  if(score > localStorage["HighScore"]){
+    localStorage["HighScore"] = score
+  }
+
   if(gameState === PLAY){
 
     gameOver.visible = false;
     restart.visible = false;
-    
+    jumpButton.visible = true;
     ground.velocityX = -(4 + 3* score/100)
     //scoring
     score = score + Math.round(getFrameRate()/60);
@@ -104,7 +114,7 @@ function draw() {
     }
     
     //jump when the space key is pressed
-    if(keyDown("space")&& trex.y >= 161.5) {
+    if(keyDown("space")&& trex.y >= 145 || mousePressedOver(jumpButton) && trex.y >= 145 ) {
         trex.velocityY = -12;
         jumpSound.play();
     }
@@ -130,7 +140,7 @@ function draw() {
    else if (gameState === END) {
       gameOver.visible = true;
       restart.visible = true;
-      
+      jumpButton.visible = false;
      //change the trex animation
       trex.changeAnimation("collided", trex_collided);
      
@@ -221,6 +231,9 @@ function spawnClouds() {
     cloud.lifetime = 200;
     
     //adjust the depth
+    cloud.depth = 1;
+    
+
     cloud.depth = trex.depth;
     trex.depth = trex.depth + 1;
     
